@@ -48,13 +48,19 @@ export async function POST(req: NextRequest) {
     let scoredLeads;
 
     if (usingApollo) {
-      // Real leads from Apollo API, then scored locally for fitScore
-      const apolloLeads = await fetchLeadsFromApollo(structuredIcp, 10);
-      if (apolloLeads.length === 0) {
-        // Fall back to mock data if Apollo returns nothing for this ICP
+      // Real leads from Apollo — fall back to mock data on ANY Apollo error
+      // so the demo never hard-fails due to API key tier or network issues.
+      try {
+        const apolloLeads = await fetchLeadsFromApollo(structuredIcp, 10);
+        if (apolloLeads.length === 0) {
+          console.warn("[/api/generate] Apollo returned 0 leads — using mock data.");
+          scoredLeads = getLeadsFromIcp(structuredIcp, 5);
+        } else {
+          scoredLeads = scoreLeads(apolloLeads, structuredIcp, 5);
+        }
+      } catch (apolloErr) {
+        console.error("[/api/generate] Apollo error (falling back to mock):", apolloErr);
         scoredLeads = getLeadsFromIcp(structuredIcp, 5);
-      } else {
-        scoredLeads = scoreLeads(apolloLeads, structuredIcp, 5);
       }
     } else {
       // Local mock leads

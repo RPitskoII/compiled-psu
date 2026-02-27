@@ -261,7 +261,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<LeadWithEmail[] | null>(null);
   const [dataSource, setDataSource] = useState<"apollo" | "mock" | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; detail?: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,14 +290,17 @@ export default function HomePage() {
       };
 
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError({
+          message: data.error ?? "Something went wrong. Please try again.",
+          detail: data.detail,
+        });
         return;
       }
 
       setResults(data.leads);
       setDataSource(data.source ?? "mock");
     } catch {
-      setError("Network error — please check your connection and try again.");
+      setError({ message: "Network error — please check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -471,11 +474,18 @@ export default function HomePage() {
             <svg className="w-5 h-5 mt-0.5 flex-shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <div>
-              <p className="text-sm font-semibold text-red-400">{error}</p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                Adjust your ICP or try again. If the issue persists, check your API key configuration.
-              </p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-red-400">{error.message}</p>
+              {error.detail && (
+                <p className="text-xs mt-1 font-mono break-words" style={{ color: "var(--text-muted)" }}>
+                  {error.detail}
+                </p>
+              )}
+              {!error.detail && (
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  Adjust your ICP or try again. If the issue persists, check your API key configuration.
+                </p>
+              )}
             </div>
           </div>
         )}

@@ -102,20 +102,18 @@ function formatFundingEvent(ev: ApolloFundingEvent): string {
 
 // ─── Step 1: People search ─────────────────────────────────────────────────
 
-async function searchPeople(
-  icp: StructuredICP,
-  perPage = 15
-): Promise<ApolloPersonResult[]> {
-  const apiKey = process.env.APOLLO_API_KEY!;
-
-  // Build query string — Apollo api_search uses query parameters
+/**
+ * Builds the shared URL query params for Apollo people search.
+ * Used by both api_search (Master key) and mixed_people/search (regular key).
+ */
+function buildPeopleSearchParams(icp: StructuredICP, perPage: number): URLSearchParams {
   const params = new URLSearchParams();
 
   for (const role of icp.roles.slice(0, 5)) {
     params.append("person_titles[]", role);
   }
 
-  // Map ICP seniority based on role keywords
+  // Seniority inference from role keywords
   const roleText = icp.roles.join(" ").toLowerCase();
   if (roleText.includes("vp") || roleText.includes("vice president")) {
     params.append("person_seniorities[]", "vp");
@@ -130,19 +128,50 @@ async function searchPeople(
 
   // Company size range
   const { min, max } = icp.company_size_range;
-  const sizeMax = max >= 999999 ? 10000 : max; // clamp open-ended ranges
+  const sizeMax = max >= 999999 ? 10000 : max;
   params.append("organization_num_employees_ranges[]", `${min},${sizeMax}`);
 
-  // Organization location (HQ-based, not person location)
+  // Organization HQ location
   for (const loc of mapLocations(icp.locations)) {
     params.append("organization_locations[]", loc);
   }
 
   params.append("per_page", String(perPage));
+  return params;
+}
 
-  const url = `${APOLLO_BASE}/mixed_people/api_search?${params.toString()}`;
+/**
+ * Normalise a person record from either endpoint into our internal shape.
+ * api_search → last_name_obfuscated, no org detail fields
+ * mixed_people/search → last_name (full), richer org object
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalisePerson(p: any): ApolloPersonResult {
+  return {
+    id: p.id ?? "",
+    first_name: p.first_name ?? "",
+    last_name_obfuscated: p.last_name ?? p.last_name_obfuscated ?? null,
+    title: p.title ?? null,
+    has_email: p.has_email ?? false,
+    has_city: p.has_city ?? false,
+    has_state: p.has_state ?? false,
+    has_country: p.has_country ?? false,
+    organization: p.organization
+      ? { name: p.organization.name ?? p.organization?.sanitized_phone ?? "" }
+      : null,
+  };
+}
 
-  const res = await fetch(url, {
+async function searchPeople(
+  icp: StructuredICP,
+  perPage = 15
+): Promise<ApolloPersonResult[]> {
+  const apiKey = process.env.APOLLO_API_KEY!;
+  const params = buildPeopleSearchParams(icp, perPage);
+
+  // ── Attempt 1: api_search (free, requires Master API key) ─────────────────
+  const apiSearchUrl = `${APOLLO_BASE}/mixed_people/api_search?${params.toString()}`;
+  const res1 = await fetch(apiSearchUrl, {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
@@ -151,13 +180,41 @@ async function searchPeople(
     },
   });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Apollo people search failed: ${res.status} — ${body}`);
+  if (res1.ok) {
+    const data = (await res1.json()) as { people?: ApolloPersonResult[] };
+    return (data.people ?? []).map(normalisePerson);
   }
 
-  const data = (await res.json()) as { people?: ApolloPersonResult[] };
-  return data.people ?? [];
+  // 403 = not a Master API key → fall back to the standard search endpoint
+  if (res1.status !== 403) {
+    const body = await res1.text().catch(() => "");
+    throw new Error(`Apollo people search failed: ${res1.status} — ${body}`);
+  }
+
+  // ── Attempt 2: mixed_people/search (works with regular API keys) ──────────
+  console.warn(
+    "[Apollo] api_search returned 403 (requires Master key). " +
+    "Falling back to /mixed_people/search — this endpoint may use export credits."
+  );
+
+  const regularSearchUrl = `${APOLLO_BASE}/mixed_people/search?${params.toString()}`;
+  const res2 = await fetch(regularSearchUrl, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+    },
+  });
+
+  if (!res2.ok) {
+    const body = await res2.text().catch(() => "");
+    throw new Error(`Apollo people search failed: ${res2.status} — ${body}`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data2 = (await res2.json()) as { people?: any[] };
+  return (data2.people ?? []).map(normalisePerson);
 }
 
 // ─── Step 2: Organization enrichment ──────────────────────────────────────
