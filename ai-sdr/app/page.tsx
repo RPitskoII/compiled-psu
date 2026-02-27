@@ -272,6 +272,7 @@ export default function HomePage() {
   const [valuePropText, setValuePropText] = useState(DEFAULT_COMPANY_CONTEXT.valueProps.join("\n"));
   const [senderName, setSenderName] = useState(DEFAULT_COMPANY_CONTEXT.senderName);
   const [senderTitle, setSenderTitle] = useState(DEFAULT_COMPANY_CONTEXT.senderTitle);
+  const [senderEmail, setSenderEmail] = useState(DEFAULT_COMPANY_CONTEXT.senderEmail);
 
   const buildCompanyContext = (): CompanyContext => ({
     companyName: companyName.trim() || DEFAULT_COMPANY_CONTEXT.companyName,
@@ -282,6 +283,7 @@ export default function HomePage() {
       .filter((l) => l.length > 0),
     senderName: senderName.trim() || DEFAULT_COMPANY_CONTEXT.senderName,
     senderTitle: senderTitle.trim() || DEFAULT_COMPANY_CONTEXT.senderTitle,
+    senderEmail: senderEmail.trim(),
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -501,7 +503,7 @@ export default function HomePage() {
                       disabled={loading}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div>
                       <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
                         Sender name
@@ -525,6 +527,20 @@ export default function HomePage() {
                         value={senderTitle}
                         onChange={(e) => setSenderTitle(e.target.value)}
                         placeholder="Account Executive"
+                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                        Sender email
+                      </label>
+                      <input
+                        type="email"
+                        value={senderEmail}
+                        onChange={(e) => setSenderEmail(e.target.value)}
+                        placeholder="alex@yourcompany.com"
                         className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                         style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
                         disabled={loading}

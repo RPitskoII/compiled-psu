@@ -77,6 +77,7 @@ export const DEFAULT_COMPANY_CONTEXT: CompanyContext = {
   ],
   senderName: "Alex Rivera",
   senderTitle: "Account Executive",
+  senderEmail: "alex@deployflow.io",
 };
 
 /**
@@ -106,7 +107,7 @@ Given a lead's profile and research summary, produce a JSON object with:
    - One clear, low-friction call to action (e.g., "15-minute call").
    - No cheesy opener. No "I hope this finds you well." No excessive flattery.
    - Do NOT invent facts not present in the research summary.
-   - Sign off from: ${ctx.senderName}, ${ctx.senderTitle}, ${ctx.companyName}.
+   - Sign off from: ${ctx.senderName}, ${ctx.senderTitle}, ${ctx.companyName}${ctx.senderEmail ? ` | ${ctx.senderEmail}` : ""}.
 
 ## Output schema (output ONLY valid JSON, no markdown, no prose)
 \`\`\`typescript
@@ -134,7 +135,7 @@ Lead profile:
 {
   "fitExplanation": "CloudSort just closed a $30M Series B and is actively tripling their engineering team, meaning their current Jenkins setup is about to face serious scaling pressure as more developers merge code daily. The combination of Kubernetes infra and a rapid hiring surge makes pipeline reliability and speed critical — outages or slow builds during this growth phase directly slow down their product velocity.",
   "subject": "CloudSort's Series B hiring sprint and your CI/CD setup",
-  "body": "Hi Jamie,\\n\\nCongrats on CloudSort's $30M Series B — tripling your engineering team while rebuilding core services is exactly the kind of growth that tends to expose cracks in CI/CD pipelines.\\n\\nWhen teams scale from 20 to 60+ engineers, build times balloon, flaky tests multiply, and the platform team ends up firefighting pipelines instead of shipping product. That's the pattern we see most at companies at your exact stage.\\n\\n${ctx.companyName} could help CloudSort move faster and ship more reliably as your team grows — happy to share how we've helped similar-stage companies.\\n\\nWould a 15-minute call next week make sense?\\n\\n${ctx.senderName}\\n${ctx.senderTitle}, ${ctx.companyName}"
+  "body": "Hi Jamie,\\n\\nCongrats on CloudSort's $30M Series B — tripling your engineering team while rebuilding core services is exactly the kind of growth that tends to expose cracks in CI/CD pipelines.\\n\\nWhen teams scale from 20 to 60+ engineers, build times balloon, flaky tests multiply, and the platform team ends up firefighting pipelines instead of shipping product. That's the pattern we see most at companies at your exact stage.\\n\\n${ctx.companyName} could help CloudSort move faster and ship more reliably as your team grows — happy to share how we've helped similar-stage companies.\\n\\nWould a 15-minute call next week make sense?\\n\\n${ctx.senderName}\\n${ctx.senderTitle}, ${ctx.companyName}${ctx.senderEmail ? `\\n${ctx.senderEmail}` : ""}"
 }
 `;
 }

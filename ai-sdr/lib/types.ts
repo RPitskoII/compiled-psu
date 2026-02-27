@@ -62,6 +62,7 @@ export interface CompanyContext {
   valueProps: string[];        // Each item: "Label — description"  e.g. "Speed — 60% faster builds"
   senderName: string;          // e.g. "Alex Rivera"
   senderTitle: string;         // e.g. "Account Executive"
+  senderEmail: string;         // e.g. "alex@deployflow.io"
 }
 
 // ─── API request / response ─────────────────────────────────────────────────
