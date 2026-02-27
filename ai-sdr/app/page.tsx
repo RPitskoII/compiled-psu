@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { GenerateRequest, GenerateResponse, LeadWithEmail } from "@/lib/types";
+import type { CompanyContext, GenerateRequest, GenerateResponse, LeadWithEmail } from "@/lib/types";
+import { DEFAULT_COMPANY_CONTEXT } from "@/lib/prompts";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -262,6 +263,26 @@ export default function HomePage() {
   const [results, setResults] = useState<LeadWithEmail[] | null>(null);
   const [dataSource, setDataSource] = useState<"apollo" | "mock" | null>(null);
   const [error, setError] = useState<{ message: string; detail?: string } | null>(null);
+  const [companyPanelOpen, setCompanyPanelOpen] = useState(false);
+
+  // Company context — pre-filled with demo defaults, fully editable by user
+  const [companyName, setCompanyName] = useState(DEFAULT_COMPANY_CONTEXT.companyName);
+  const [productDescription, setProductDescription] = useState(DEFAULT_COMPANY_CONTEXT.productDescription);
+  // Value props stored as a single textarea string (one per line) for easy editing
+  const [valuePropText, setValuePropText] = useState(DEFAULT_COMPANY_CONTEXT.valueProps.join("\n"));
+  const [senderName, setSenderName] = useState(DEFAULT_COMPANY_CONTEXT.senderName);
+  const [senderTitle, setSenderTitle] = useState(DEFAULT_COMPANY_CONTEXT.senderTitle);
+
+  const buildCompanyContext = (): CompanyContext => ({
+    companyName: companyName.trim() || DEFAULT_COMPANY_CONTEXT.companyName,
+    productDescription: productDescription.trim() || DEFAULT_COMPANY_CONTEXT.productDescription,
+    valueProps: valuePropText
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0),
+    senderName: senderName.trim() || DEFAULT_COMPANY_CONTEXT.senderName,
+    senderTitle: senderTitle.trim() || DEFAULT_COMPANY_CONTEXT.senderTitle,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,6 +295,7 @@ export default function HomePage() {
       icpDescription,
       geography,
       companySize,
+      companyContext: buildCompanyContext(),
     };
 
     try {
@@ -426,6 +448,122 @@ export default function HomePage() {
                 <option value="1000+">1,000+</option>
               </select>
             </div>
+          </div>
+
+          {/* ── Company context panel ─────────────────────────────────── */}
+          <div
+            className="rounded-lg overflow-hidden"
+            style={{ border: "1px solid var(--border)" }}
+          >
+            <button
+              type="button"
+              onClick={() => setCompanyPanelOpen((v) => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:opacity-80"
+              style={{ background: "var(--surface-2)" }}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                  Your company
+                </span>
+                <span
+                  className="text-xs px-1.5 py-0.5 rounded font-medium"
+                  style={{ background: "var(--accent-muted)", color: "var(--accent-hover)" }}
+                >
+                  {companyName || "unnamed"}
+                </span>
+              </div>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${companyPanelOpen ? "rotate-180" : ""}`}
+                style={{ color: "var(--text-muted)" }}
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {companyPanelOpen && (
+              <div className="px-4 py-4 space-y-4" style={{ borderTop: "1px solid var(--border)" }}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                      Company name
+                    </label>
+                    <input
+                      type="text"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="e.g. Acme Corp"
+                      className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                        Sender name
+                      </label>
+                      <input
+                        type="text"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        placeholder="Alex Rivera"
+                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                        Sender title
+                      </label>
+                      <input
+                        type="text"
+                        value={senderTitle}
+                        onChange={(e) => setSenderTitle(e.target.value)}
+                        placeholder="Account Executive"
+                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    What your product does
+                  </label>
+                  <textarea
+                    value={productDescription}
+                    onChange={(e) => setProductDescription(e.target.value)}
+                    rows={2}
+                    placeholder="A unified platform that replaces X with Y for Z customers…"
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    Value props <span className="normal-case font-normal ml-1" style={{ color: "var(--text-muted)" }}>(one per line — e.g. "Speed — 60% faster builds")</span>
+                  </label>
+                  <textarea
+                    value={valuePropText}
+                    onChange={(e) => setValuePropText(e.target.value)}
+                    rows={4}
+                    placeholder={"Speed — 60% faster build times\nReliability — automatic rollback on failures\nScale — no DevOps headcount needed"}
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <button

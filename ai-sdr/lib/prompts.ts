@@ -1,3 +1,5 @@
+import type { CompanyContext } from "@/lib/types";
+
 // ============================================================
 // PROMPT A — ICP Normalization (LLM Call #1)
 // ============================================================
@@ -58,30 +60,53 @@ Output:
 // PROMPT B — Fit Reasoning + Email Generation (LLM Call #2)
 // ============================================================
 
-export const EMAIL_GENERATION_SYSTEM_PROMPT = `\
-You are a senior SDR at DeployFlow, a CI/CD platform built specifically for mid-market engineering teams at high-growth SaaS companies.
+/**
+ * Default company context — used to pre-fill the UI form.
+ * Users replace this with their own company info at runtime.
+ */
+export const DEFAULT_COMPANY_CONTEXT: CompanyContext = {
+  companyName: "DeployFlow",
+  productDescription:
+    "A unified CI/CD and deployment platform that replaces Jenkins, self-managed GitHub Actions runners, or Bitbucket Pipelines with a managed, auto-scaling pipeline infrastructure built for high-growth engineering teams.",
+  valueProps: [
+    "Speed — Teams cut median build + deploy time by 60% through intelligent caching, parallelized test runs, and ephemeral build environments.",
+    "Reliability — Built-in deployment health checks, automatic rollback on error-rate spikes, and per-PR preview environments eliminate broken releases.",
+    "Scale without DevOps headcount — Self-tunes as teams grow; companies going from 5 to 50 engineers don't need a dedicated platform team to keep pipelines healthy.",
+    "Observability — A single pane of glass for pipeline duration, flakiness trends, and deployment frequency — key DORA metrics out of the box.",
+    "Migration ease — 90-minute guided migration from GitHub Actions or Jenkins; dedicated onboarding engineer included.",
+  ],
+  senderName: "Alex Rivera",
+  senderTitle: "Account Executive",
+};
 
-## About DeployFlow (use these facts, do not invent others)
-- **Core product**: A unified CI/CD and deployment platform that replaces Jenkins, self-managed GitHub Actions runners, or Bitbucket Pipelines with a managed, auto-scaling pipeline infrastructure.
-- **Value prop 1 — Speed**: Teams cut median build + deploy time by 60% through intelligent caching, parallelized test runs, and ephemeral build environments.
-- **Value prop 2 — Reliability**: Built-in deployment health checks, automatic rollback on error-rate spikes, and per-PR preview environments eliminate broken releases.
-- **Value prop 3 — Scale without DevOps headcount**: DeployFlow self-tunes as teams grow; companies going from 5 to 50 engineers don't need a dedicated platform team to keep pipelines healthy.
-- **Value prop 4 — Observability**: A single pane of glass for pipeline duration, flakiness trends, and deployment frequency — key DORA metrics out of the box.
-- **Value prop 5 — Migration ease**: 90-minute guided migration from GitHub Actions or Jenkins; dedicated onboarding engineer included.
-- **Target customer**: Engineering leaders at 100–1,000-person SaaS companies who are scaling their teams, have recently raised funding, or are struggling with slow/brittle pipelines.
+/**
+ * Builds the email generation system prompt dynamically from the user-supplied
+ * CompanyContext. Nothing about the selling company is hardcoded here.
+ */
+export function buildEmailGenerationPrompt(ctx: CompanyContext): string {
+  const valuePropLines = ctx.valueProps
+    .map((vp, i) => `- **Value prop ${i + 1} — ${vp}**`)
+    .join("\n");
+
+  return `\
+You are a senior SDR at ${ctx.companyName}.
+
+## About ${ctx.companyName} (use these facts, do not invent others)
+- **Core product**: ${ctx.productDescription}
+${valuePropLines}
 
 ## Your task
 Given a lead's profile and research summary, produce a JSON object with:
-1. \`fitExplanation\`: 2–4 sentences explaining why this specific company and person are a strong fit for DeployFlow RIGHT NOW. Reference concrete signals from their profile (hiring, funding, tech stack, growth stage). Be direct and analytical, not flattery.
+1. \`fitExplanation\`: 2–4 sentences explaining why this specific company and person are a strong fit for ${ctx.companyName} RIGHT NOW. Reference concrete signals from their profile (hiring, funding, tech stack, growth stage). Be direct and analytical, not flattery.
 2. \`subject\`: A compelling, specific cold email subject line (under 10 words, no punctuation at start).
 3. \`body\`: A cold outbound email body (120–220 words). Requirements:
    - Professional but conversational tone.
    - Reference AT LEAST ONE specific company detail from the research (funding event, hiring signals, tech stack item, or company milestone).
-   - Explicitly connect that detail to a CI/CD pain point or DeployFlow benefit.
+   - Explicitly connect that detail to a concrete benefit of ${ctx.companyName}'s product.
    - One clear, low-friction call to action (e.g., "15-minute call").
    - No cheesy opener. No "I hope this finds you well." No excessive flattery.
    - Do NOT invent facts not present in the research summary.
-   - Sign off from: Alex Rivera, Account Executive, DeployFlow.
+   - Sign off from: ${ctx.senderName}, ${ctx.senderTitle}, ${ctx.companyName}.
 
 ## Output schema (output ONLY valid JSON, no markdown, no prose)
 \`\`\`typescript
@@ -92,7 +117,7 @@ Given a lead's profile and research summary, produce a JSON object with:
 }
 \`\`\`
 
-## Example (study the style carefully)
+## Example (study the style — adapt company name and product to ${ctx.companyName})
 
 ### Input
 Lead profile:
@@ -108,7 +133,8 @@ Lead profile:
 ### Output
 {
   "fitExplanation": "CloudSort just closed a $30M Series B and is actively tripling their engineering team, meaning their current Jenkins setup is about to face serious scaling pressure as more developers merge code daily. The combination of Kubernetes infra and a rapid hiring surge makes pipeline reliability and speed critical — outages or slow builds during this growth phase directly slow down their product velocity.",
-  "subject": "CloudSort's Jenkins pipelines and your Series B hiring sprint",
-  "body": "Hi Jamie,\\n\\nCongrats on CloudSort's $30M Series B — tripling your engineering team while rebuilding core services is exactly the kind of growth that tends to expose cracks in Jenkins pipelines.\\n\\nWhen teams scale from 20 to 60+ engineers, build times balloon, flaky tests multiply, and the platform team ends up firefighting pipelines instead of shipping product. That's the pattern we see most at companies at your exact stage.\\n\\nDeployFlow replaces Jenkins with a managed, auto-scaling CI/CD layer that cuts median build time by 60% and includes automatic rollback so broken deploys don't become 2am incidents. We handle the scaling complexity as you hire — no dedicated DevOps headcount required.\\n\\nWe migrated a logistics SaaS company of similar size off Jenkins in under 90 minutes, including a dedicated onboarding engineer.\\n\\nWould a 15-minute call next week make sense to see if the timing is right for CloudSort?\\n\\nAlex Rivera\\nAccount Executive, DeployFlow"
+  "subject": "CloudSort's Series B hiring sprint and your CI/CD setup",
+  "body": "Hi Jamie,\\n\\nCongrats on CloudSort's $30M Series B — tripling your engineering team while rebuilding core services is exactly the kind of growth that tends to expose cracks in CI/CD pipelines.\\n\\nWhen teams scale from 20 to 60+ engineers, build times balloon, flaky tests multiply, and the platform team ends up firefighting pipelines instead of shipping product. That's the pattern we see most at companies at your exact stage.\\n\\n${ctx.companyName} could help CloudSort move faster and ship more reliably as your team grows — happy to share how we've helped similar-stage companies.\\n\\nWould a 15-minute call next week make sense?\\n\\n${ctx.senderName}\\n${ctx.senderTitle}, ${ctx.companyName}"
 }
 `;
+}

@@ -54,12 +54,23 @@ export interface LeadWithEmail {
   personalizedEmail: PersonalizedEmail;
 }
 
+// ─── Company context (provided by the user at runtime) ──────────────────────
+
+export interface CompanyContext {
+  companyName: string;         // e.g. "DeployFlow"
+  productDescription: string;  // 1–3 sentences on what the product does
+  valueProps: string[];        // Each item: "Label — description"  e.g. "Speed — 60% faster builds"
+  senderName: string;          // e.g. "Alex Rivera"
+  senderTitle: string;         // e.g. "Account Executive"
+}
+
 // ─── API request / response ─────────────────────────────────────────────────
 
 export interface GenerateRequest {
   icpDescription: string;
-  geography?: string;       // "Any" | "US" | "EU" | "North America"
-  companySize?: string;     // "50-200" | "200-500" | "500-1000" | "1000+"
+  geography?: string;          // "Any" | "US" | "EU" | "North America"
+  companySize?: string;        // "50-200" | "200-500" | "500-1000" | "1000+"
+  companyContext: CompanyContext;
 }
 
 export interface GenerateResponse {

@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ICP_NORMALIZATION_SYSTEM_PROMPT, EMAIL_GENERATION_SYSTEM_PROMPT } from "@/lib/prompts";
-import type { ScoredLead, StructuredICP, PersonalizedEmail } from "@/lib/types";
+import { ICP_NORMALIZATION_SYSTEM_PROMPT, buildEmailGenerationPrompt } from "@/lib/prompts";
+import type { CompanyContext, ScoredLead, StructuredICP, PersonalizedEmail } from "@/lib/types";
 
 // Instantiate once per module (safe in Next.js API routes / server components)
 const anthropic = new Anthropic({
@@ -65,7 +65,8 @@ interface LlmEmailOutput {
 
 export async function generateFitAndEmailWithLlm(
   lead: ScoredLead,
-  icp: StructuredICP
+  icp: StructuredICP,
+  companyContext: CompanyContext
 ): Promise<{ fitExplanation: string; personalizedEmail: PersonalizedEmail }> {
   const userContent = `
 ## Structured ICP (target profile)
@@ -88,7 +89,7 @@ Generate the JSON output now.
   const message = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    system: EMAIL_GENERATION_SYSTEM_PROMPT,
+    system: buildEmailGenerationPrompt(companyContext),
     messages: [{ role: "user", content: userContent }],
   });
 
@@ -116,8 +117,7 @@ Generate the JSON output now.
       parsed.body.toLowerCase().includes(lead.name.split(" ")[0].toLowerCase()));
 
   if (!emailIsValid) {
-    // Re-prompt once with explicit regeneration instruction
-    return generateFitAndEmailWithLlm(lead, icp);
+    return generateFitAndEmailWithLlm(lead, icp, companyContext);
   }
 
   return {

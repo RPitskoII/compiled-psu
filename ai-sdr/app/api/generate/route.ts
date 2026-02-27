@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { normalizeIcpWithLlm, generateFitAndEmailWithLlm } from "@/lib/llm";
 import { getLeadsFromIcp, scoreLeads } from "@/lib/leadSelector";
 import { fetchLeadsFromApollo } from "@/lib/apollo";
+import { DEFAULT_COMPANY_CONTEXT } from "@/lib/prompts";
 import type { GenerateRequest, GenerateResponse, LeadWithEmail } from "@/lib/types";
 
 export const runtime = "nodejs"; // Ensure Node.js runtime (not Edge) for Anthropic SDK
@@ -18,7 +19,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { icpDescription, geography, companySize } = body;
+  const { icpDescription, geography, companySize, companyContext: rawCtx } = body;
+
+  // Fall back to hardcoded defaults if the client didn't send a context
+  // (e.g. direct API calls or older clients)
+  const companyContext = rawCtx ?? DEFAULT_COMPANY_CONTEXT;
 
   if (!icpDescription || icpDescription.trim().length < 10) {
     return NextResponse.json(
@@ -79,7 +84,7 @@ export async function POST(req: NextRequest) {
     const enrichedLeads: LeadWithEmail[] = await Promise.all(
       scoredLeads.map(async (lead) => {
         const { fitExplanation, personalizedEmail } =
-          await generateFitAndEmailWithLlm(lead, structuredIcp);
+          await generateFitAndEmailWithLlm(lead, structuredIcp, companyContext);
 
         return {
           id: lead.id,
