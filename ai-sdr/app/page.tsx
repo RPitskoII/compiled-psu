@@ -9,10 +9,10 @@ import { DEFAULT_COMPANY_CONTEXT } from "@/lib/prompts";
 function FitScoreBadge({ score }: { score: number }) {
   const color =
     score >= 75
-      ? "bg-emerald-500/20 text-emerald-400 ring-emerald-500/30"
+      ? "bg-green-100 text-green-800 ring-green-300"
       : score >= 50
-      ? "bg-amber-500/20 text-amber-400 ring-amber-500/30"
-      : "bg-rose-500/20 text-rose-400 ring-rose-500/30";
+      ? "bg-yellow-100 text-yellow-800 ring-yellow-300"
+      : "bg-red-100 text-red-700 ring-red-300";
 
   const label =
     score >= 75 ? "Strong fit" : score >= 50 ? "Good fit" : "Possible fit";
@@ -24,10 +24,10 @@ function FitScoreBadge({ score }: { score: number }) {
       <span
         className={`w-1.5 h-1.5 rounded-full ${
           score >= 75
-            ? "bg-emerald-400"
+            ? "bg-green-600"
             : score >= 50
-            ? "bg-amber-400"
-            : "bg-rose-400"
+            ? "bg-yellow-500"
+            : "bg-red-500"
         }`}
       />
       {score}/100 · {label}
@@ -60,8 +60,8 @@ function CopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium
-        bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/30
-        hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-150"
+        bg-black/5 text-black ring-1 ring-black/15
+        hover:bg-black/10 transition-all duration-150"
     >
       {copied ? (
         <>
@@ -108,7 +108,7 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
             <FitScoreBadge score={lead.fitScore} />
           </div>
           <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-            {lead.title} · <span className="text-indigo-400 font-medium">{lead.company}</span>
+            {lead.title} · <span className="font-semibold" style={{ color: "var(--text)" }}>{lead.company}</span>
           </p>
         </div>
       </div>
@@ -138,9 +138,9 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
         {/* Fit explanation */}
         <div
           className="rounded-lg px-4 py-3"
-          style={{ background: "var(--accent-muted)", border: "1px solid rgba(99,102,241,0.25)" }}
+          style={{ background: "var(--accent-muted)", border: "1px solid var(--border)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5 text-indigo-400">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
             Why they&apos;re a fit right now
           </p>
           <p className="text-sm leading-relaxed" style={{ color: "var(--text)" }}>
@@ -220,7 +220,7 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
               >
                 {lead.personalizedEmail.body.split("\n").find((l) => l.trim()) ?? ""}
               </p>
-              <p className="text-xs mt-1 text-indigo-400 group-hover:text-indigo-300 transition-colors">
+              <p className="text-xs mt-1 transition-colors" style={{ color: "var(--text-muted)" }}>
                 Click to expand full email →
               </p>
             </div>
@@ -236,7 +236,7 @@ function LoadingState() {
     <div className="flex flex-col items-center justify-center py-20 gap-4">
       <div className="relative w-12 h-12">
         <div
-          className="absolute inset-0 rounded-full border-2 border-t-indigo-500 border-r-indigo-500/50 border-b-indigo-500/20 border-l-transparent animate-spin"
+          className="absolute inset-0 rounded-full border-2 border-t-black border-r-black/40 border-b-black/10 border-l-transparent animate-spin"
         />
       </div>
       <div className="text-center">
@@ -335,30 +335,25 @@ export default function HomePage() {
       {/* Top nav bar */}
       <header
         className="sticky top-0 z-10 px-6 py-3 flex items-center justify-between"
-        style={{ background: "rgba(15,17,23,0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--border)" }}
+        style={{ background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", borderBottom: "1px solid var(--border)" }}
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--accent)" }}>
             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
           <span className="font-bold text-sm tracking-tight" style={{ color: "var(--text)" }}>
-            AI SDR <span className="text-indigo-400">for Dev Tools</span>
+            AI SDR for Dev Tools
           </span>
         </div>
-        <span className="text-xs px-2.5 py-1 rounded-full ring-1 ring-indigo-500/30 text-indigo-400 bg-indigo-500/10">
-          Powered by Claude
-        </span>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10 pb-20">
         {/* Hero */}
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold tracking-tight mb-3" style={{ color: "var(--text)" }}>
-            Turn an ICP into researched leads
-            <br />
-            <span className="text-indigo-400">and personalized emails</span>
+            Turn an ICP into researched leads and personalized emails
           </h1>
           <p className="text-base max-w-lg mx-auto" style={{ color: "var(--text-muted)" }}>
             Describe your ideal customer, and the agent will surface matching leads with a concrete reason they need your product today.
@@ -385,7 +380,7 @@ export default function HomePage() {
               onChange={(e) => setIcpDescription(e.target.value)}
               rows={4}
               placeholder="e.g. VP of Engineering at post-Series A SaaS companies with 100–500 employees who are actively hiring engineers…"
-              className="w-full rounded-lg px-4 py-3 text-sm resize-y transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="w-full rounded-lg px-4 py-3 text-sm resize-y transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-black/20"
               style={{
                 background: "var(--surface-2)",
                 border: "1px solid var(--border)",
@@ -408,7 +403,7 @@ export default function HomePage() {
                 id="geo"
                 value={geography}
                 onChange={(e) => setGeography(e.target.value)}
-                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition-all"
                 style={{
                   background: "var(--surface-2)",
                   border: "1px solid var(--border)",
@@ -435,7 +430,7 @@ export default function HomePage() {
                 id="size"
                 value={companySize}
                 onChange={(e) => setCompanySize(e.target.value)}
-                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 transition-all"
                 style={{
                   background: "var(--surface-2)",
                   border: "1px solid var(--border)",
@@ -464,7 +459,7 @@ export default function HomePage() {
               style={{ background: "var(--surface-2)" }}
             >
               <div className="flex items-center gap-2">
-                <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -499,7 +494,7 @@ export default function HomePage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="e.g. Acme Corp"
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
                     disabled={loading}
                   />
@@ -515,7 +510,7 @@ export default function HomePage() {
                     value={senderName}
                     onChange={(e) => setSenderName(e.target.value)}
                     placeholder="Alex Rivera"
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
                     disabled={loading}
                   />
@@ -531,7 +526,7 @@ export default function HomePage() {
                     value={senderTitle}
                     onChange={(e) => setSenderTitle(e.target.value)}
                     placeholder="Account Executive"
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
                     disabled={loading}
                   />
@@ -547,7 +542,7 @@ export default function HomePage() {
                     value={senderEmail}
                     onChange={(e) => setSenderEmail(e.target.value)}
                     placeholder="alex@yourcompany.com"
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
                     disabled={loading}
                   />
@@ -564,7 +559,7 @@ export default function HomePage() {
                     onChange={(e) => setProductDescription(e.target.value)}
                     rows={3}
                     placeholder="A unified platform that replaces X with Y for Z customers…"
-                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-black/20"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)", minHeight: "72px" }}
                     disabled={loading}
                   />
@@ -581,7 +576,7 @@ export default function HomePage() {
                     onChange={(e) => setValuePropText(e.target.value)}
                     rows={5}
                     placeholder={"Speed — 60% faster build times\nReliability — automatic rollback on failures\nScale — no DevOps headcount needed"}
-                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono"
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-black/20 font-mono"
                     style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)", minHeight: "100px" }}
                     disabled={loading}
                   />
@@ -608,7 +603,7 @@ export default function HomePage() {
           >
             {loading ? (
               <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
@@ -662,12 +657,12 @@ export default function HomePage() {
               </h2>
               <div className="flex items-center gap-2">
                 {dataSource === "apollo" ? (
-                  <span className="text-xs px-2.5 py-1 rounded-full ring-1 ring-sky-500/30 text-sky-400 bg-sky-500/10 font-medium flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                  <span className="text-xs px-2.5 py-1 rounded-full ring-1 ring-black/20 text-black bg-black/5 font-medium flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-black animate-pulse" />
                     Live · Apollo.io
                   </span>
                 ) : (
-                  <span className="text-xs px-2.5 py-1 rounded-full ring-1 ring-violet-500/30 text-violet-400 bg-violet-500/10 font-medium">
+                  <span className="text-xs px-2.5 py-1 rounded-full ring-1 ring-black/15 text-black/60 bg-black/5 font-medium">
                     Demo · Mock data
                   </span>
                 )}
