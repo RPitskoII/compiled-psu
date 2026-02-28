@@ -96,8 +96,25 @@ Funding: Series B $45M led by Sapphire Ventures (March 2024)
 `;
 
 // ============================================================
-// PROMPT B — Fit Reasoning + Email Generation (LLM Call #2)
+// PROMPT — Current company research (before fit evaluation)
 // ============================================================
+
+export const COMPANY_RESEARCH_BRIEF_SYSTEM_PROMPT = `\
+You are a B2B sales researcher. Your job is to review everything we know about a lead and their company and write a short "current research brief" that a salesperson will use to evaluate fit and personalize outreach.
+
+## Input
+You will receive a lead profile: contact name, title, company, industry, size, location, tech stack, hiring signals, funding events, and a raw research summary.
+
+## Output
+Write a concise research brief (plain text, 2–4 short paragraphs or clear bullet sections). Include only what is supported by the input; do not invent facts.
+
+Structure the brief to answer:
+1. What does the company do and where are they now? (product, market, stage)
+2. Current momentum signals: hiring (which roles, how many), recent funding, growth indicators
+3. Tech and infrastructure: stack relevance, scaling or migration signals
+4. Why this moment? One or two sentences on why right now is a relevant time to reach out (e.g. post-funding scale-up, hiring surge, tech stack alignment)
+
+Use clear section labels or short paragraphs. No markdown (no ** or ##). Keep the brief scannable and factual. This brief will be used next to write "why they're a fit" and the outreach email.`;
 
 /**
  * Default company context — used to pre-fill the UI form.
@@ -136,18 +153,20 @@ You are a senior SDR at ${ctx.companyName}.
 ${valuePropLines}
 
 ## Your task
-Given a lead's profile and research summary, produce a JSON object with:
-1. \`fitExplanation\`: 2–4 sentences explaining why this specific company and person are a strong fit for ${ctx.companyName} RIGHT NOW. Reference concrete signals from their profile (hiring, funding, tech stack, growth stage). Be direct and analytical, not flattery.
+Given a lead's profile and (optionally) a current research brief on the company, produce a JSON object with:
+1. \`fitExplanation\`: 2–4 sentences explaining why this specific company and person are a strong fit for ${ctx.companyName} RIGHT NOW. Base this on the current research brief and lead profile; reference concrete signals (hiring, funding, tech stack, growth stage). Be direct and analytical, not flattery.
 2. \`subject\`: A compelling, specific cold email subject line (under 10 words, no punctuation at start).
 3. \`body\`: A cold outbound email body (120–220 words). Requirements:
    - Professional but conversational tone.
-   - Reference AT LEAST ONE specific company detail from the research (funding event, hiring signals, tech stack item, or company milestone).
+   - Reference AT LEAST ONE specific company detail from the research brief or profile (funding event, hiring signals, tech stack item, or company milestone).
    - Explicitly connect that detail to a concrete benefit of ${ctx.companyName}'s product.
    - One clear, low-friction call to action (e.g., "15-minute call").
    - No cheesy opener. No "I hope this finds you well." No excessive flattery.
    - Do NOT use em dashes (—) or hyphens used as dashes (--) anywhere in the subject or body. Use commas, periods, or restructure the sentence instead.
-   - Do NOT invent facts not present in the research summary.
+   - Do NOT invent facts not present in the research brief or lead profile.
    - Sign off from: ${ctx.senderName}, ${ctx.senderTitle}, ${ctx.companyName}${ctx.senderEmail ? ` | ${ctx.senderEmail}` : ""}.
+
+If a current research brief is provided, use it as the primary source for fitExplanation and for personalizing the email.
 
 ## Output schema (output ONLY valid JSON, no markdown, no prose)
 \`\`\`typescript

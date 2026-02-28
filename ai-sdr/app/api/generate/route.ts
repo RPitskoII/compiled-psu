@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { normalizeIcpWithLlm, generateFitAndEmailWithLlm, formatResearchSummaryWithLlm } from "@/lib/llm";
+import { normalizeIcpWithLlm, generateFitAndEmailWithLlm, formatResearchSummaryWithLlm, researchCompanyWithLlm } from "@/lib/llm";
 import { getLeadsFromIcp, scoreLeads } from "@/lib/leadSelector";
 import { fetchLeadsFromApollo } from "@/lib/apollo";
 import { DEFAULT_COMPANY_CONTEXT } from "@/lib/prompts";
@@ -79,12 +79,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Steps 3 & 4: Format research signals with LLM, then run email generation per lead.
+    // ── Steps 3 & 4: Research company with LLM, format research signals, then generate fit + email per lead.
     const enrichedLeads: LeadWithEmail[] = await Promise.all(
       scoredLeads.map(async (lead) => {
+        const researchBrief = await researchCompanyWithLlm(lead);
         const formattedResearchSummary = await formatResearchSummaryWithLlm(lead.researchSummary);
         const { fitExplanation, personalizedEmail } =
-          await generateFitAndEmailWithLlm(lead, structuredIcp, companyContext);
+          await generateFitAndEmailWithLlm(lead, structuredIcp, companyContext, researchBrief);
 
         return {
           id: lead.id,

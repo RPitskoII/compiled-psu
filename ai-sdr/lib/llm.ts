@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ICP_NORMALIZATION_SYSTEM_PROMPT, buildEmailGenerationPrompt, FORMAT_RESEARCH_SIGNALS_SYSTEM_PROMPT } from "@/lib/prompts";
+import { ICP_NORMALIZATION_SYSTEM_PROMPT, buildEmailGenerationPrompt, FORMAT_RESEARCH_SIGNALS_SYSTEM_PROMPT, COMPANY_RESEARCH_BRIEF_SYSTEM_PROMPT } from "@/lib/prompts";
 import type { CompanyContext, ScoredLead, StructuredICP, PersonalizedEmail } from "@/lib/types";
 
 // Instantiate once per module (safe in Next.js API routes / server components)
@@ -75,6 +75,38 @@ export async function formatResearchSummaryWithLlm(researchSummary: string): Pro
   return rawText || researchSummary;
 }
 
+// ─── LLM Call — Current company research (before fit + email) ───────────────
+
+export async function researchCompanyWithLlm(lead: ScoredLead): Promise<string> {
+  const userContent = `
+Lead: ${lead.name}, ${lead.title}
+Company: ${lead.company} (${lead.industry})
+Company size: ~${lead.company_size} employees
+Location: ${lead.location}
+
+Tech stack: ${lead.tech_stack.join(", ")}
+Hiring signals: ${lead.hiring_signals.join("; ")}
+Funding events: ${lead.funding_events.join("; ")}
+
+Raw research summary:
+${lead.researchSummary}
+
+Write the current research brief now.
+`.trim();
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 600,
+    system: COMPANY_RESEARCH_BRIEF_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: userContent }],
+  });
+
+  const rawText =
+    message.content[0].type === "text" ? message.content[0].text.trim() : "";
+
+  return rawText || lead.researchSummary;
+}
+
 // ─── LLM Call #2 — Generate fit explanation + personalized email per lead ────
 
 interface LlmEmailOutput {
@@ -86,25 +118,30 @@ interface LlmEmailOutput {
 export async function generateFitAndEmailWithLlm(
   lead: ScoredLead,
   icp: StructuredICP,
-  companyContext: CompanyContext
+  companyContext: CompanyContext,
+  researchBrief?: string
 ): Promise<{ fitExplanation: string; personalizedEmail: PersonalizedEmail }> {
-  const userContent = `
-## Structured ICP (target profile)
-${JSON.stringify(icp, null, 2)}
-
-## Lead profile
-- Name: ${lead.name}
-- Title: ${lead.title}
-- Company: ${lead.company} (${lead.industry})
-- Company size: ~${lead.company_size} employees
-- Location: ${lead.location}
-- Tech stack: ${lead.tech_stack.join(", ")}
-- Hiring signals: ${lead.hiring_signals.join("; ")}
-- Funding events: ${lead.funding_events.join("; ")}
-- Research summary: ${lead.researchSummary}
-
-Generate the JSON output now.
-`.trim();
+  const userContent = [
+    "## Structured ICP (target profile)",
+    JSON.stringify(icp, null, 2),
+    "",
+    "## Lead profile",
+    `- Name: ${lead.name}`,
+    `- Title: ${lead.title}`,
+    `- Company: ${lead.company} (${lead.industry})`,
+    `- Company size: ~${lead.company_size} employees`,
+    `- Location: ${lead.location}`,
+    `- Tech stack: ${lead.tech_stack.join(", ")}`,
+    `- Hiring signals: ${lead.hiring_signals.join("; ")}`,
+    `- Funding events: ${lead.funding_events.join("; ")}`,
+    researchBrief
+      ? ["", "## Current research brief on this company", "Use the research brief above to write fitExplanation and the email.", "", researchBrief]
+      : ["", "## Research summary", lead.researchSummary],
+    "",
+    "Generate the JSON output now.",
+  ]
+    .flat()
+    .join("\n");
 
   const message = await anthropic.messages.create({
     model: MODEL,
@@ -137,7 +174,7 @@ Generate the JSON output now.
       parsed.body.toLowerCase().includes(lead.name.split(" ")[0].toLowerCase()));
 
   if (!emailIsValid) {
-    return generateFitAndEmailWithLlm(lead, icp, companyContext);
+    return generateFitAndEmailWithLlm(lead, icp, companyContext, researchBrief);
   }
 
   return {
