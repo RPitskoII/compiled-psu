@@ -51,6 +51,8 @@ export interface LeadWithEmail {
   fitScore: number;
   fitExplanation: string;
   researchSummary: string;
+  /** LLM-formatted version for display; use this in UI when present */
+  formattedResearchSummary?: string;
   personalizedEmail: PersonalizedEmail;
 }
 

@@ -126,12 +126,18 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
         </div>
 
         {/* Research signals */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+        <div
+          className="rounded-lg px-4 py-3"
+          style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#64748b" }}>
             Research signals
           </p>
-          <p className="text-sm leading-relaxed" style={{ color: "#a5b0d0" }}>
-            {lead.researchSummary}
+          <p
+            className="text-sm leading-relaxed whitespace-pre-line"
+            style={{ color: "#0f172a" }}
+          >
+            {lead.formattedResearchSummary ?? lead.researchSummary}
           </p>
         </div>
 
@@ -175,12 +181,12 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
           {/* Subject line — always visible */}
           <div
             className="rounded-t-lg px-4 py-2.5 flex items-center gap-2"
-            style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
+            style={{ background: "#f1f5f9", border: "1px solid #e2e8f0", color: "#0f172a" }}
           >
-            <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+            <span className="text-xs font-medium" style={{ color: "#64748b" }}>
               Subject:
             </span>
-            <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+            <span className="text-sm font-semibold" style={{ color: "#0f172a" }}>
               {lead.personalizedEmail.subject}
             </span>
           </div>
@@ -190,14 +196,14 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
             <div
               className="rounded-b-lg px-4 py-4 border-t-0"
               style={{
-                background: "#13151f",
-                border: "1px solid var(--border)",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderTop: "none",
               }}
             >
               <pre
                 className="text-sm leading-relaxed whitespace-pre-wrap font-sans"
-                style={{ color: "var(--text)", maxHeight: "none" }}
+                style={{ color: "#0f172a", maxHeight: "none" }}
               >
                 {lead.personalizedEmail.body}
               </pre>
@@ -208,19 +214,19 @@ function LeadCard({ lead, index }: { lead: LeadWithEmail; index: number }) {
             <div
               className="rounded-b-lg px-4 py-3 border-t-0 cursor-pointer group"
               style={{
-                background: "#13151f",
-                border: "1px solid var(--border)",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
                 borderTop: "none",
               }}
               onClick={() => setEmailExpanded(true)}
             >
               <p
                 className="text-sm truncate group-hover:opacity-80 transition-opacity"
-                style={{ color: "var(--text-muted)" }}
+                style={{ color: "#334155" }}
               >
                 {lead.personalizedEmail.body.split("\n").find((l) => l.trim()) ?? ""}
               </p>
-              <p className="text-xs mt-1 transition-colors" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs mt-1 text-indigo-600 group-hover:text-indigo-500 transition-colors">
                 Click to expand full email →
               </p>
             </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { normalizeIcpWithLlm, generateFitAndEmailWithLlm } from "@/lib/llm";
+import { normalizeIcpWithLlm, generateFitAndEmailWithLlm, formatResearchSummaryWithLlm } from "@/lib/llm";
 import { getLeadsFromIcp, scoreLeads } from "@/lib/leadSelector";
 import { fetchLeadsFromApollo } from "@/lib/apollo";
 import { DEFAULT_COMPANY_CONTEXT } from "@/lib/prompts";
@@ -79,10 +79,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ── Steps 3 & 4: Research synthesis is pre-built in researchSummary.
-    //    Run LLM email generation for each lead in parallel. ──────────────────
+    // ── Steps 3 & 4: Format research signals with LLM, then run email generation per lead.
     const enrichedLeads: LeadWithEmail[] = await Promise.all(
       scoredLeads.map(async (lead) => {
+        const formattedResearchSummary = await formatResearchSummaryWithLlm(lead.researchSummary);
         const { fitExplanation, personalizedEmail } =
           await generateFitAndEmailWithLlm(lead, structuredIcp, companyContext);
 
@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
           fitScore: lead.fitScore,
           fitExplanation,
           researchSummary: lead.researchSummary,
+          formattedResearchSummary,
           personalizedEmail,
           source: usingApollo ? ("apollo" as const) : ("mock" as const),
         } satisfies LeadWithEmail & { source: "apollo" | "mock" };

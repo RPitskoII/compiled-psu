@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { ICP_NORMALIZATION_SYSTEM_PROMPT, buildEmailGenerationPrompt } from "@/lib/prompts";
+import { ICP_NORMALIZATION_SYSTEM_PROMPT, buildEmailGenerationPrompt, FORMAT_RESEARCH_SIGNALS_SYSTEM_PROMPT } from "@/lib/prompts";
 import type { CompanyContext, ScoredLead, StructuredICP, PersonalizedEmail } from "@/lib/types";
 
 // Instantiate once per module (safe in Next.js API routes / server components)
@@ -53,6 +53,26 @@ export async function normalizeIcpWithLlm(
   }
 
   return parsed;
+}
+
+// ─── LLM Call — Format research summary for readability ──────────────────────
+
+export async function formatResearchSummaryWithLlm(researchSummary: string): Promise<string> {
+  if (!researchSummary || researchSummary.trim().length < 10) {
+    return researchSummary;
+  }
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 512,
+    system: FORMAT_RESEARCH_SIGNALS_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: researchSummary }],
+  });
+
+  const rawText =
+    message.content[0].type === "text" ? message.content[0].text.trim() : "";
+
+  return rawText || researchSummary;
 }
 
 // ─── LLM Call #2 — Generate fit explanation + personalized email per lead ────
