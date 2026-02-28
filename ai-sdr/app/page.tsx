@@ -385,7 +385,7 @@ export default function HomePage() {
               onChange={(e) => setIcpDescription(e.target.value)}
               rows={4}
               placeholder="e.g. VP of Engineering at post-Series A SaaS companies with 100–500 employees who are actively hiring engineers…"
-              className="w-full rounded-lg px-4 py-3 text-sm resize-none transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="w-full rounded-lg px-4 py-3 text-sm resize-y transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
               style={{
                 background: "var(--surface-2)",
                 border: "1px solid var(--border)",
@@ -487,97 +487,106 @@ export default function HomePage() {
             </button>
 
             {companyPanelOpen && (
-              <div className="px-4 py-4 space-y-4" style={{ borderTop: "1px solid var(--border)" }}>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
-                      Company name
-                    </label>
-                    <input
-                      type="text"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="e.g. Acme Corp"
-                      className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                      style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
-                        Sender name
-                      </label>
-                      <input
-                        type="text"
-                        value={senderName}
-                        onChange={(e) => setSenderName(e.target.value)}
-                        placeholder="Alex Rivera"
-                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-                        disabled={loading}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
-                        Sender title
-                      </label>
-                      <input
-                        type="text"
-                        value={senderTitle}
-                        onChange={(e) => setSenderTitle(e.target.value)}
-                        placeholder="Account Executive"
-                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-                        disabled={loading}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
-                        Sender email
-                      </label>
-                      <input
-                        type="email"
-                        value={senderEmail}
-                        onChange={(e) => setSenderEmail(e.target.value)}
-                        placeholder="alex@yourcompany.com"
-                        className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
+              <div className="px-4 py-4 space-y-3" style={{ borderTop: "1px solid var(--border)" }}>
+
+                {/* Company name */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    Company name
+                  </label>
+                  <input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="e.g. Acme Corp"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
                 </div>
 
+                {/* Sender name */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    Sender name
+                  </label>
+                  <input
+                    type="text"
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    placeholder="Alex Rivera"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Sender title */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    Sender title
+                  </label>
+                  <input
+                    type="text"
+                    value={senderTitle}
+                    onChange={(e) => setSenderTitle(e.target.value)}
+                    placeholder="Account Executive"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Sender email */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    Sender email
+                  </label>
+                  <input
+                    type="email"
+                    value={senderEmail}
+                    onChange={(e) => setSenderEmail(e.target.value)}
+                    placeholder="alex@yourcompany.com"
+                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* What your product does — resizable */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
                     What your product does
+                    <span className="normal-case font-normal ml-1.5" style={{ color: "var(--text-muted)" }}>— drag corner to expand</span>
                   </label>
                   <textarea
                     value={productDescription}
                     onChange={(e) => setProductDescription(e.target.value)}
-                    rows={2}
+                    rows={3}
                     placeholder="A unified platform that replaces X with Y for Z customers…"
-                    className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)", minHeight: "72px" }}
                     disabled={loading}
                   />
                 </div>
 
+                {/* Value props — resizable */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--text-muted)" }}>
-                    Value props <span className="normal-case font-normal ml-1" style={{ color: "var(--text-muted)" }}>(one per line — e.g. "Speed — 60% faster builds")</span>
+                    Value props
+                    <span className="normal-case font-normal ml-1.5" style={{ color: "var(--text-muted)" }}>— one per line, e.g. "Speed — 60% faster builds" · drag to expand</span>
                   </label>
                   <textarea
                     value={valuePropText}
                     onChange={(e) => setValuePropText(e.target.value)}
-                    rows={4}
+                    rows={5}
                     placeholder={"Speed — 60% faster build times\nReliability — automatic rollback on failures\nScale — no DevOps headcount needed"}
-                    className="w-full rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono"
-                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono"
+                    style={{ background: "var(--surface-2)", border: "1px solid var(--border)", color: "var(--text)", minHeight: "100px" }}
                     disabled={loading}
                   />
                 </div>
+
               </div>
             )}
           </div>
