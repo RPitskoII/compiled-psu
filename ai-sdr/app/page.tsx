@@ -344,7 +344,7 @@ export default function HomePage() {
             </svg>
           </div>
           <span className="font-bold text-sm tracking-tight" style={{ color: "var(--text)" }}>
-            AI SDR for Dev Tools
+            Propelr.ai
           </span>
         </div>
       </header>
