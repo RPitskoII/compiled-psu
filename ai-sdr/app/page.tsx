@@ -361,7 +361,7 @@ export default function HomePage() {
             <span className="text-indigo-400">and personalized emails</span>
           </h1>
           <p className="text-base max-w-lg mx-auto" style={{ color: "var(--text-muted)" }}>
-            Describe your ideal customer, and the agent will surface matching leads with a concrete reason they need your product — today.
+            Describe your ideal customer, and the agent will surface matching leads with a concrete reason they need your product today.
           </p>
         </div>
 
