@@ -106,6 +106,7 @@ Given a lead's profile and research summary, produce a JSON object with:
    - Explicitly connect that detail to a concrete benefit of ${ctx.companyName}'s product.
    - One clear, low-friction call to action (e.g., "15-minute call").
    - No cheesy opener. No "I hope this finds you well." No excessive flattery.
+   - Do NOT use em dashes (—) or hyphens used as dashes (--) anywhere in the subject or body. Use commas, periods, or restructure the sentence instead.
    - Do NOT invent facts not present in the research summary.
    - Sign off from: ${ctx.senderName}, ${ctx.senderTitle}, ${ctx.companyName}${ctx.senderEmail ? ` | ${ctx.senderEmail}` : ""}.
 
